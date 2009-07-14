@@ -19,9 +19,43 @@
 # Free Software Foundation, Inc., 59 Temple Place, Suite 330,
 # Boston, MA  02111-1307  USA
 
-SUBDIRS = \
-	gtk2 \
-	x11 \
-	qt4 \
-	clutter \
+if IBUS_BUILD_CLUTTER
+
+libibus = $(top_builddir)/src/libibus.la
+
+INCLUDES = \
+	-I$(top_srcdir)/src \
 	$(NULL)
+
+immoduledir = @CLUTTER_IMCONTEXT_LIBDIR@/clutter-imcontext/immodules
+immodule_LTLIBRARIES = im-ibus.la
+
+im_ibus_la_SOURCES = \
+	ibus-im.c \
+	ibus-imcontext.c \
+	ibus-imcontext.h \
+	$(NULL)
+
+im_ibus_la_DEPENDENCIES = $(libibus)
+im_ibus_la_LIBADD = $(libibus)
+
+im_ibus_la_CFLAGS = \
+	@CLUTTER_CFLAGS@ \
+	@DBUS_CFLAGS@ \
+	-DG_LOG_DOMAIN=\"IBUS\" \
+	$(NULL)
+
+im_ibus_la_LDFLAGS = \
+	@CLUTTER_LIBS@ \
+	@DBUS_LIBS@ \
+	-avoid-version \
+	-module \
+	$(NULL)
+
+$(libibus):
+	(cd $(top_builddir)/src; make )
+
+EXTRA_DIST = \
+	$(NULL)
+
+endif

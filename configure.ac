@@ -155,6 +155,19 @@ if test x"$IBUS_HAS_QT4" == x"yes"; then
     AC_SUBST(QMAKE)
 fi
 
+# Check for CLUTTER
+PKG_CHECK_MODULES(CLUTTER,
+    [clutter-0.9 >= 0.9.7 clutter-imcontext-0.1],
+    [IBUS_HAS_CLUTTER=yes],
+    [IBUS_HAS_CLUTTER=no]
+)
+
+if test x"$IBUS_HAS_CLUTTER" = x"yes"; then
+  CLUTTER_IMCONTEXT_LIBDIR=`$PKG_CONFIG --variable=libdir clutter-imcontext-0.1`
+  AC_SUBST(CLUTTER_LIBDIR)
+  AC_SUBST(CLUTTER_IMCONTEXT_LIBDIR)
+fi
+
 # Check for x11
 PKG_CHECK_MODULES(X11, [
     x11
@@ -218,6 +231,17 @@ fi
 enable_qt4=no
 AM_CONDITIONAL(IBUS_BUILD_QT4, [test x"$enable_qt4" = x"yes" ])
 
+AC_ARG_ENABLE(clutter-immodule,
+    AS_HELP_STRING([--disable-clutter-immodule],
+        [do not build clutter immodule]),
+    [enable_clutter=$enableval],
+    [enable_clutter=yes],
+)
+if test x"$IBUS_HAS_CLUTTER" != x"yes"; then
+    enable_clutter=no
+fi
+AM_CONDITIONAL(IBUS_BUILD_CLUTTER, [test x"$enable_clutter" = x"yes" ])
+
 # check for dbus-python
 AC_ARG_ENABLE(dbus-python-check,
     AS_HELP_STRING([--disable-dbus-python-check],
@@ -276,6 +300,7 @@ client/Makefile
 client/gtk2/Makefile
 client/qt4/Makefile
 client/x11/Makefile
+client/clutter/Makefile
 setup/Makefile
 setup/ibus-setup
 src/Makefile
@@ -303,6 +328,7 @@ Build options:
   Build static libs        $enable_static
   Gtk immodule dir         $GTK_IM_MODULEDIR
   Enable Qt4 IM module     $enable_qt4
+  Enable Clutter IM module $enable_clutter
   Build document           $enable_gtk_doc
 ])
 
